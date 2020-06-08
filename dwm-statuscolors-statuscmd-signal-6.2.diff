@@ -1,7 +1,7 @@
 From 23f9509020a4a0fa4de56b92c220c9f1ea19027e Mon Sep 17 00:00:00 2001
 From: Christopher Witt <github@ch-witt.de>
 Date: Sun, 7 Jun 2020 20:14:50 +0200
-Subject: [PATCH] merge statuscmd-signal and statuscolors patches
+Subject: [PATCH 1/2] merge statuscmd-signal and statuscolors patches
 
 ---
  config.def.h | 17 +++++++---
@@ -221,6 +221,81 @@ index 9fd0286..5f1752d 100644
  		strcpy(stext, "dwm-"VERSION);
 +	else
 +		copyvalidchars(stext, rawstext);
+ 	drawbar(selmon);
+ }
+ 
+-- 
+2.27.0
+
+
+From e37b777f2388678801016cfd1c541e296e696328 Mon Sep 17 00:00:00 2001
+From: Christopher Witt <github@ch-witt.de>
+Date: Mon, 8 Jun 2020 20:25:52 +0200
+Subject: [PATCH 2/2] fix alignment of stext to right
+
+---
+ dwm.c | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/dwm.c b/dwm.c
+index 5f1752d..ade4043 100644
+--- a/dwm.c
++++ b/dwm.c
+@@ -156,7 +156,7 @@ static void clientmessage(XEvent *e);
+ static void configure(Client *c);
+ static void configurenotify(XEvent *e);
+ static void configurerequest(XEvent *e);
+-static void copyvalidchars(char *text, char *rawtext);
++static void copyvalidchars(char *cleantext, char *text, char *rawtext);
+ static Monitor *createmon(void);
+ static void destroynotify(XEvent *e);
+ static void detach(Client *c);
+@@ -242,6 +242,7 @@ static void zoom(const Arg *arg);
+ static const char broken[] = "broken";
+ static char stext[256];
+ static char rawstext[256];
++static char cleanstext[256];
+ static int dwmblockssig;
+ pid_t dwmblockspid = 0;
+ static int screen;
+@@ -652,16 +653,20 @@ configurerequest(XEvent *e)
+ }
+ 
+ void
+-copyvalidchars(char *text, char *rawtext)
++copyvalidchars(char *cleantext, char *text, char *rawtext)
+ {
+-	int i = -1, j = 0;
++	int i = -1, j = 0, k = 0;
+ 
+ 	while(rawtext[++i]) {
+ 		if ((unsigned char)rawtext[i] >= '\x10') {
+ 			text[j++] = rawtext[i];
+ 		}
++		if ((unsigned char)rawtext[i] >= ' ') {
++			cleantext[k++] = rawtext[i];
++		}
+ 	}
+ 	text[j] = '\0';
++	cleantext[k] = '\0';
+ }
+ 
+ Monitor *
+@@ -745,7 +750,7 @@ drawbar(Monitor *m)
+ 	/* draw status first so it can be overdrawn by tags later */
+ 	if (m == selmon) { /* status is only drawn on selected monitor */
+ 		drw_setscheme(drw, scheme[SchemeNorm]);
+-		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
++		tw = TEXTW(cleanstext) - lrpad + 2; /* 2px right padding */
+        while (1) {
+            if ((unsigned int)*ts > LENGTH(colors)) { ts++; continue ; }
+            ctmp = *ts;
+@@ -2072,7 +2077,7 @@ updatestatus(void)
+ 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
+ 		strcpy(stext, "dwm-"VERSION);
+ 	else
+-		copyvalidchars(stext, rawstext);
++		copyvalidchars(cleanstext, stext, rawstext);
  	drawbar(selmon);
  }
  
