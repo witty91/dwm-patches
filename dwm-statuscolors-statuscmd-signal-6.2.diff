@@ -53,7 +53,7 @@ index 9fd0286..5f1752d 100644
  /* enums */
  enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 -enum { SchemeNorm, SchemeSel }; /* color schemes */
-+enum { SchemeNorm=17, SchemeSel, SchemeWarn, SchemeUrgent }; /* color schemes */
++enum { SchemeNorm=16, SchemeSel, SchemeWarn, SchemeUrgent }; /* color schemes */
  enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
         NetWMFullscreen, NetActiveWindow, NetWMWindowType,
         NetWMWindowTypeDialog, NetClientList, NetLast }; /* EWMH atoms */
@@ -156,7 +156,7 @@ index 9fd0286..5f1752d 100644
  		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
 -		drw_text(drw, m->ww - tw, 0, tw, bh, 0, stext, 0);
 +       while (1) {
-+           if ((unsigned int)*ts > LENGTH(colors)) { ts++; continue ; }
++			if ((unsigned int)*ts > LENGTH(colors)) { ts++; continue ; }
 +           ctmp = *ts;
 +           *ts = '\0';
 +           drw_text(drw, m->ww - tw + tx, 0, tw - tx, bh, 0, tp, 0);
@@ -288,7 +288,7 @@ index 5f1752d..ade4043 100644
 -		tw = TEXTW(stext) - lrpad + 2; /* 2px right padding */
 +		tw = TEXTW(cleanstext) - lrpad + 2; /* 2px right padding */
         while (1) {
-            if ((unsigned int)*ts > LENGTH(colors)) { ts++; continue ; }
+			if ((unsigned int)*ts > LENGTH(colors)) { ts++; continue ; }
             ctmp = *ts;
 @@ -2072,7 +2077,7 @@ updatestatus(void)
  	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
